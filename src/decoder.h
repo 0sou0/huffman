@@ -31,4 +31,6 @@ void lire_contenu(FILE *fichier_compresse, noeud *alphabet[]);
  ****************************************/
 void creer_dossier(char *cheminFichier);
 
+char* changer_nom(char* nom_fichier);
+
 #endif 

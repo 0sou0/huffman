@@ -1,7 +1,9 @@
 CC = gcc
 CDFLAGS = -W -Wall -pedantic -std=c89 -O2
 
-huffman : main.o arbre.o tableau.o decoder.o encoder.o outils.o
+all : huffman5 
+
+huffman5 : main.o arbre.o tableau.o decoder.o encoder.o outils.o
 	$(CC) $(CDFLAGS) $^ -o $@
 
 main.o : main.c arbre.h tableau.h type.h
@@ -22,6 +24,14 @@ encoder.o : encoder.c type.h
 outils.o : outils.c type.h
 	$(CC) $(CDFLAGS) -c $<
 
-clean :
-	rm -f *.o huffman
 
+
+ouverture:
+	chmod +x ouverture.sh
+
+pdf:
+	pdflatex Sans-ti.tex
+	open Sans-ti.pdf
+	
+clean :
+	rm -f *.o huffman5 *.txt 

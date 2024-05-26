@@ -35,7 +35,7 @@ void lire_entete(FILE *fichier, noeud *alphabet[]){
          if(alphabet[(int)initial] == NULL) {
             alphabet[(int)initial] = malloc(sizeof(noeud));
             if(alphabet[(int)initial] == NULL){
-                printf("erreur allocation memoire");
+                printf("erreur allocation memoire \n");
                 return;
             }
          }
@@ -78,24 +78,76 @@ void lire_entete(FILE *fichier, noeud *alphabet[]){
  * sortie : aucune (void), creer le dossier
  ****************************************/
 void creer_dossier(char *cheminFichier) {
+  char *cheminDossier = NULL;
+  char *dernierSlash;
+  size_t longueurCheminDossier = 0;
+  char commande[2048];
     /*Trouver la dernière occurrence de '/'*/
-    char *dernierSlash = strrchr(cheminFichier, '/');
+    dernierSlash = strrchr(cheminFichier, '/');
     if (dernierSlash != NULL) {
         /*Calculer la longueur du chemin du dossier*/
-        size_t longueurCheminDossier = dernierSlash - cheminFichier;
+        longueurCheminDossier = dernierSlash - cheminFichier;
         /*Allouer de la mémoire pour le chemin du dossier*/
-        char *cheminDossier = (char *)malloc(longueurCheminDossier + 1);
+        cheminDossier = (char *)malloc(longueurCheminDossier + 1);
         if (cheminDossier != NULL) {
             /*Copier le chemin du dossier dans la nouvelle chaîne*/
             strncpy(cheminDossier, cheminFichier, longueurCheminDossier);
             /*Ajouter le caractère de fin de chaîne*/
             cheminDossier[longueurCheminDossier] = '\0';
             /*Créer le dossier*/
-            mkdir(cheminDossier, 0777);
+        sprintf(commande, "%s %s", "mkdir -p ", cheminDossier);
+            if(system(commande) != 0){
+          printf("Erreur creation dossier \n");
+        }
             /*Libérer la mémoire allouée*/
             free(cheminDossier);
         }
     }
+}
+
+/* Définition de la fonction */
+char* changer_nom(char* nom_fichier) {
+  FILE* fic = NULL;
+  char base[100];
+  char ext[10];   
+  char nouveau_nom[2048]; 
+  char* dernier_point;
+  int taille_base;
+  int i;
+
+  fic = fopen(nom_fichier, "r");
+  if(fic == NULL){
+    return nom_fichier;
+  }
+  fclose(fic);
+  
+  /* Initialisation des chaînes de caractères */
+  strcpy(base, "");
+  strcpy(ext, "");
+  strcpy(nouveau_nom, "");
+
+  /* Trouve l'index du dernier point dans le nom du fichier */
+  dernier_point = strrchr(nom_fichier, '.');
+  if (dernier_point != NULL) {
+    taille_base = dernier_point - nom_fichier;
+    /* Copie le nom de base */
+    for (i = 0; i < taille_base; ++i) {
+      base[i] = nom_fichier[i];
+    }
+    base[taille_base] = '\0';
+
+    /* Copie l'extension */
+    strcpy(ext, dernier_point);
+
+    /* Construit le nouveau nom avec (1) */
+    sprintf(nouveau_nom, "%s_1%s", base, ext);
+  } else {
+    /* Si pas d'extension, copie simplement le nom */
+    strcpy(nouveau_nom, nom_fichier);
+  }
+
+  /* Renvoie le nouveau nom */
+  return strcpy(nom_fichier, nouveau_nom);
 }
 
 /****************************************
@@ -122,6 +174,7 @@ void lire_contenu(FILE *fichier_compresse, noeud *alphabet[]) {
         exit(EXIT_FAILURE);
     }
     creer_dossier(nom_fichier);
+    changer_nom(nom_fichier);
     fichier_decompresse = fopen(nom_fichier, "w");
     
     if (fichier_decompresse == NULL) {
@@ -163,6 +216,7 @@ void lire_contenu(FILE *fichier_compresse, noeud *alphabet[]) {
                 return;
             }
             creer_dossier(nom_fichier);
+        changer_nom(nom_fichier);
             fichier_decompresse = fopen(nom_fichier, "w");
             if(fscanf(fichier_compresse, "%d", &taille)!=1){
                 fclose(fichier_decompresse);
@@ -173,7 +227,3 @@ void lire_contenu(FILE *fichier_compresse, noeud *alphabet[]) {
 
      
 }
-
-
-
-  
