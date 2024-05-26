@@ -27,13 +27,13 @@ int i;
 void creer_code(noeud *element, int code, int profondeur, noeud *alphabet[]) {
   if (est_feuille(element)) {
     alphabet[(int)element->initial] = element;
-    /*if(element->initial == '\n'){
+    if(element->initial == '\n'){
       printf("\"\\n\" code : ");
     }
     else{
       printf("\"%c\" code : ", element->initial);
     }
-    affichage_code(profondeur, code);*/
+    affichage_code(profondeur, code);
     element->codage = code;
     element->bits = profondeur;
   }
@@ -58,7 +58,6 @@ void ecrire_bit(FILE *fichier, int bit, char *buffer, int *pos) {
     *buffer |= (bit << (7 - *pos));
   }
   (*pos)++;
-    
   if (*pos == 8) {
     fwrite(buffer, 1, 1,fichier);
     *pos = 0;
@@ -87,18 +86,14 @@ int i,bit;
 
 /****************************************
  * fonction : ecrire_entete
- * description : Écrit l'en-tête dans le fichier compressé, incluant le nombre de feuilles
- *               et pour chaque feuille, son caractère, son occurrence,
- *               la taille de son codage, et son codage binaire selon l'arbre de Huffman.
- * entree : pointeur vers FILE (fichier_compresse), tableau de pointeurs vers noeud (alphabet),
- *          entier nombre_feuilles indiquant le nombre de caractères uniques
- * sortie : aucune (void)
+ * description : Écrit l'en-tête dans le fichier compressé, y compris les détails des caractères et leurs codages
+ * entree : pointeur vers fichier fichier_compresse, tableau de pointeurs vers noeud alphabet[], entier nombre_feuilles
+ * sortie : aucune (void), écrit l'en-tête dans le fichier
  ****************************************/
 void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuilles){
-    int i, j;
     char buffer = 0;
-    int pos=0;
- 
+    int pos = 0;
+    int i, j;
     fprintf(fichier_compresse, "%d\n", nombre_feuilles);
 
     for ( i = 0; i < 256; i++) {
@@ -107,7 +102,6 @@ void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuill
 	  
 	  fprintf(fichier_compresse, " %d ",alphabet[i]->occ);
 	  fprintf(fichier_compresse, "%d ",alphabet[i]->bits);
-  
 	  for (j=0; j < alphabet[i]->bits; j++) {
 	    fprintf(fichier_compresse, "%d",(alphabet[i]->codage >> (alphabet[i]->bits - j - 1))   & 1);
 	  }
@@ -115,40 +109,20 @@ void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuill
 
     }
   }
-  
-
 }
 
-
-   
 /****************************************
  * fonction : contenu_compresse
- * description : Parcourt le fichier à compresser, calcule la taille totale des données compressées
- *               en se basant sur le codage de Huffman et écrit les données compressées dans
- *               le fichier de sortie. Utilise la fonction ecrire_code_huffman pour chaque caractère.
- * entree : pointeur vers FILE (fichier) à compresser, pointeur vers FILE (fichier_compresse) pour
- *          écrire le contenu compressé, tableau de pointeurs vers noeud (alphabet) représentant
- *          l'arbre de Huffman
- * sortie : aucune (void)
+ * description : Lit le contenu d'un fichier et écrit sa version compressée dans un autre fichier
+ * entree : pointeur vers fichier 'fichier'(source), pointeur vers fichier 'fichier_compresse' (destination),
+ *          tableau de pointeurs vers noeud alphabet[]
+ * sortie : aucune (void), écrit le contenu compressé dans le fichier de destination
  ****************************************/
 void contenu_compresse(FILE *fichier, FILE *fichier_compresse, noeud *alphabet[]) {
   int c;
   char buffer = 0; 
   int pos = 0;
-  int taille = 0;
-
-
-  while((c = fgetc(fichier)) != EOF){
-    if (alphabet[c] != NULL && alphabet[c]->occ > 0) {
-        taille +=alphabet[c]->bits;
-      }
-    }
-    fprintf(fichier_compresse, "%d", taille);
-
   rewind(fichier);
-
-
-
   while((c = fgetc(fichier)) != EOF){
     if (alphabet[c] != NULL && alphabet[c]->occ > 0) {
       ecrire_code_huffman(fichier_compresse, alphabet[c]->codage, alphabet[c]->bits, &buffer, &pos );
@@ -156,10 +130,7 @@ void contenu_compresse(FILE *fichier, FILE *fichier_compresse, noeud *alphabet[]
   }
   if(pos > 0){
         fwrite(&buffer, 1, 1, fichier_compresse);
-  }
-  
+      }
 }
-
-
 
 
