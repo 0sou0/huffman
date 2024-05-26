@@ -1,0 +1,18 @@
+Version 1:
+- La première version du logiciel Huffman gère la compression d'un seul fichier texte.
+
+Version 2:
+- Cette version ajoute la capacité de compresser plusieurs fichiers texte en une seule archive. Lors de la décompression, tous les fichiers texte d'origine sont reconstitués dans le répertoire courant.
+
+Version 3:
+- La troisième version du logiciel prend en charge la compression des fichiers texte situés dans un seul dossier sans sous-dossiers. Lors de la décompression, le dossier est recréé si les fichiers doivent être décompressés dans un répertoire spécifique.
+
+Version 4:
+- Dans la quatrième version, le logiciel peut traiter une arborescence complète de dossiers et de fichiers textes. Lors de la compression, le logiciel conserve la structure de dossiers. Lors de la décompression, l'arborescence originale est reconstituée.
+
+Version 5:
+- La cinquième version étend les fonctionnalités pour traiter une liste de dossiers et/ou fichiers, y compris plusieurs arborescences. Lors de la décompression, les fichiers et l'arborescence sont re-créés conformément à leur structure originale.
+
+Version 6:
+- La version finale offre une interface graphique optionnelle pour la compression et la décompression. L'interface en ligne de commande reste disponible. La version graphique n'est développée qu'après avoir achevé la cinquième version.
+
