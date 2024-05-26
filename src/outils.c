@@ -7,7 +7,7 @@
  * sortie : aucune (void), affiche un message sur la sortie standard
  ****************************************/
 void usage(char *s){
-    printf("Usage : %s <fichier.txt> <fichier_compresse.txt> \n", s);
+    printf("Usage : %s <liste_fichier.txt> <fichier_compresse.txt> \n", s);
 }
 
 /****************************************
@@ -39,6 +39,8 @@ void liberer_inis(noeud *a[]){
         }
     }
 }
+
+
 
 
 /****************************************

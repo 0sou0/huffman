@@ -10,6 +10,7 @@
  * entree : pointeur vers fichier FILE *fichier, tableau de pointeurs vers noeud alphabet[]
  * sortie : aucune (void), termine le programme en cas d'erreur de lecture
  ****************************************/
+
 void lire_entete(FILE *fichier, noeud *alphabet[]){
     int nombre_feuilles = 0;
     int occ = 0;
@@ -18,6 +19,7 @@ void lire_entete(FILE *fichier, noeud *alphabet[]){
     int bits = 0;
     int i,j;
     char initial;
+
 
     if(fscanf(fichier, "%d", &nombre_feuilles) != 1){
         printf("Erreur lecture nombre feuille\n");
@@ -46,8 +48,8 @@ void lire_entete(FILE *fichier, noeud *alphabet[]){
         printf("occurence = %d\nbits = %d\n",occ, bits );
         alphabet[(int)initial]->occ = occ;
         alphabet[(int)initial]->bits = bits;
-
         
+       
         codage_bis = 0;
         for(j=0; j<bits; j++){
             if(fscanf(fichier, "%c", &codage) != 1){
@@ -67,15 +69,15 @@ void lire_entete(FILE *fichier, noeud *alphabet[]){
 
 
 
-
-
 /****************************************
  * fonction : lire_contenu
  * description : Lit le contenu compressé, décode les caractères selon l'alphabet et les écrit dans un fichier de sortie
  * entree : pointeur vers fichier FILE *fichier_compresse, tableau de pointeurs vers noeud alphabet[]
- * sortie : aucune (void)
+ * sortie : aucune (void), crée un fichier "decompresse.txt" contenant le texte décompressé
  ****************************************/
-void lire_contenu(FILE *fichier_compresse, noeud *alphabet[], char* chemin) {
+void lire_contenu(FILE *fichier_compresse, noeud *alphabet[]) {
+    FILE *fichier_decompresse = NULL;
+    char nom_fichier[2048];
     char codage, buffer = 0;
     int codage_bis = 0; 
     int bits_lus = 0;
@@ -83,20 +85,20 @@ void lire_contenu(FILE *fichier_compresse, noeud *alphabet[], char* chemin) {
     int taille = 0; 
     int i, j;
 
-    FILE *fichier_decompresse;
-    
-    fichier_decompresse= fopen(chemin, "w");
+    if(fscanf(fichier_compresse, "%s", nom_fichier)!=1){
+        printf("Erreur lecture nom du fichier\n");
+        exit(EXIT_FAILURE);
+    }
+    fichier_decompresse = fopen(nom_fichier, "w");
     if (fichier_decompresse == NULL) {
-        perror("Erreur création fichier décompressé\n");
+        printf("Erreur création fichier décompressé\n");
         exit(EXIT_FAILURE);
     }
 
-    for(i = 0; i < 256; i++){
-        if(alphabet[i] != NULL){
-            taille += alphabet[i]->occ * alphabet[i]->bits;
-        }
+    if(fscanf(fichier_compresse, "%d", &taille)!=1){
+        printf("erreur lecture taille fichier\n");
+        return;
     }
-    
     while (fread(&codage, sizeof(char), 1, fichier_compresse)) {
         for(j = 0; j < 8; j++){
             if(taille == 0){
@@ -107,7 +109,7 @@ void lire_contenu(FILE *fichier_compresse, noeud *alphabet[], char* chemin) {
             pos++;
             codage_bis = (codage_bis << 1) | buffer;
             taille--;
-           
+
 
         
             for (i = 0; i < 256; i++) {
@@ -120,11 +122,21 @@ void lire_contenu(FILE *fichier_compresse, noeud *alphabet[], char* chemin) {
             }
         }
         pos = 0;
+        if(taille == 0){
+            fclose(fichier_decompresse);
+            if(fscanf(fichier_compresse, "%s", nom_fichier)!=1){
+                return;
+            }
+            fichier_decompresse = fopen(nom_fichier, "w");
+            if(fscanf(fichier_compresse, "%d", &taille)!=1){
+                fclose(fichier_decompresse);
+                return;
+            }
+        }
     }
 
-    fclose(fichier_decompresse); 
+     
 }
-
 
 
 

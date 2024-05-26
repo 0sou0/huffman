@@ -58,6 +58,7 @@ void ecrire_bit(FILE *fichier, int bit, char *buffer, int *pos) {
     *buffer |= (bit << (7 - *pos));
   }
   (*pos)++;
+    
   if (*pos == 8) {
     fwrite(buffer, 1, 1,fichier);
     *pos = 0;
@@ -91,17 +92,20 @@ int i,bit;
  * sortie : aucune (void), écrit l'en-tête dans le fichier
  ****************************************/
 void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuilles){
-    char buffer = 0;
-    int pos = 0;
     int i, j;
+    char buffer = 0;
+    int pos=0;
+
     fprintf(fichier_compresse, "%d\n", nombre_feuilles);
 
     for ( i = 0; i < 256; i++) {
         if (alphabet[i] != NULL && alphabet[i]->occ > 0) {
+	  
 	  ecrire_code_huffman(fichier_compresse, alphabet[i]->initial, sizeof(char) * 8, &buffer, &pos);
 	  
 	  fprintf(fichier_compresse, " %d ",alphabet[i]->occ);
 	  fprintf(fichier_compresse, "%d ",alphabet[i]->bits);
+  
 	  for (j=0; j < alphabet[i]->bits; j++) {
 	    fprintf(fichier_compresse, "%d",(alphabet[i]->codage >> (alphabet[i]->bits - j - 1))   & 1);
 	  }
@@ -109,7 +113,12 @@ void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuill
 
     }
   }
+  
+
 }
+
+
+   
 
 /****************************************
  * fonction : contenu_compresse
@@ -122,7 +131,18 @@ void contenu_compresse(FILE *fichier, FILE *fichier_compresse, noeud *alphabet[]
   int c;
   char buffer = 0; 
   int pos = 0;
+  int taille = 0;
+
+
+  while((c = fgetc(fichier)) != EOF){
+    if (alphabet[c] != NULL && alphabet[c]->occ > 0) {
+        taille +=alphabet[c]->bits;
+      }
+    }
+    fprintf(fichier_compresse, "%d", taille);
+
   rewind(fichier);
+
   while((c = fgetc(fichier)) != EOF){
     if (alphabet[c] != NULL && alphabet[c]->occ > 0) {
       ecrire_code_huffman(fichier_compresse, alphabet[c]->codage, alphabet[c]->bits, &buffer, &pos );
@@ -130,7 +150,10 @@ void contenu_compresse(FILE *fichier, FILE *fichier_compresse, noeud *alphabet[]
   }
   if(pos > 0){
         fwrite(&buffer, 1, 1, fichier_compresse);
-      }
+  }
+  
 }
+
+
 
 
