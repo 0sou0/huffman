@@ -41,25 +41,18 @@ void ecrire_code_huffman(FILE *fichier, int codage, int bits, char *buffer, int 
 
 /****************************************
  * fonction : ecrire_entete
- * description : Écrit l'en-tête dans le fichier compressé, incluant le nombre de feuilles
- *               et pour chaque feuille, son caractère, son occurrence,
- *               la taille de son codage, et son codage binaire selon l'arbre de Huffman.
- * entree : pointeur vers FILE (fichier_compresse), tableau de pointeurs vers noeud (alphabet),
- *          entier nombre_feuilles indiquant le nombre de caractères uniques
- * sortie : aucune (void)
+ * description : Écrit l'en-tête dans le fichier compressé, y compris les détails des caractères et leurs codages
+ * entree : pointeur vers fichier fichier_compresse, tableau de pointeurs vers noeud alphabet[], entier nombre_feuilles
+ * sortie : aucune (void), écrit l'en-tête dans le fichier
  ****************************************/
-void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[] , int nombre_feuilles);
+void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuilles);
 
-
- /****************************************
+/****************************************
  * fonction : contenu_compresse
- * description : Parcourt le fichier à compresser, calcule la taille totale des données compressées
- *               en se basant sur le codage de Huffman et écrit les données compressées dans
- *               le fichier de sortie. Utilise la fonction ecrire_code_huffman pour chaque caractère.
- * entree : pointeur vers FILE (fichier) à compresser, pointeur vers FILE (fichier_compresse) pour
- *          écrire le contenu compressé, tableau de pointeurs vers noeud (alphabet) représentant
- *          l'arbre de Huffman
- * sortie : aucune (void)
+ * description : Lit le contenu d'un fichier et écrit sa version compressée dans un autre fichier
+ * entree : pointeur vers fichier 'fichier'(source), pointeur vers fichier 'fichier_compresse' (destination),
+ *          tableau de pointeurs vers noeud alphabet[]
+ * sortie : aucune (void), écrit le contenu compressé dans le fichier de destination
  ****************************************/
 void contenu_compresse(FILE *fichier, FILE *fichier_compresse, noeud *alphabet[]);
 
