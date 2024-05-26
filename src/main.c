@@ -4,8 +4,9 @@
 #include "decoder.h"
 #include "encoder.h"
 #include "outils.h"
-#include <string.h>
 #define PATH_MAX 4096
+
+
 
 
 /****************************************
@@ -19,20 +20,23 @@ int main(int argc, char *argv[]){
   FILE *fichier_compresse=NULL;
   noeud *arbre_huffman[N];
   noeud *alphabet[N];
-  int tab[N];
+  
   int i, nb_noeuds=0, nombre_feuilles=0;
   int opt, compresse = 0, decompresse = 0, optind=2;
   char *chemin_fichier_compresse = NULL;
-  char *dossier_cible = "."; 
-  char chemin[PATH_MAX];
+  int fich_idx;
 
+  int tab_global[N];
+  
   while ( (opt=getopt(argc, argv, "c:d:h")) != -1){
         switch (opt){
         case 'c':
           compresse = 1;
+          
           break;
         case 'd':
           decompresse = 1;
+          chemin_fichier_compresse = argv[optind];
           break;
       	case 'h':
           afficher_aide();
@@ -63,27 +67,34 @@ int main(int argc, char *argv[]){
 
 
   /*Validation du nombre d'arguments*/
-    if(argc < 3 && argc > 3){
+    if(argc < 3){
       usage(argv[0]);
       exit(EXIT_FAILURE);
     }
+
 if(compresse == 1){
-  /*Ouverture du fichier à compresser*/
-    fichier = fopen(argv[2], "r");
-    if(fichier == NULL){
-      printf("Erreur lors de l'ouverture du fichier \n");
-      exit(EXIT_FAILURE);
+   init_tab(tab_global);
+  
+    for (fich_idx = optind; fich_idx < argc - 1; fich_idx++) {
+            fichier = fopen(argv[fich_idx], "rb");
+            if (fichier == NULL) {
+                fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", argv[fich_idx]);
+                continue;
+            }
+ 
+    
+    occurence(fichier, tab_global);
+     fclose(fichier);
     }
-  /*Initialisation du tableau d'occurrences et construction de l'arbre*/
-    init_tab(tab);
-    occurence(fichier, tab);
-    arbre(arbre_huffman, tab);
+
+
+    arbre(arbre_huffman, tab_global);
     
 
   /*Création des feuilles de l'arbre Huffman*/
     for (i = 0; i < 256; i++) {
-        if (tab[i] > 0) {
-        arbre_huffman[nb_noeuds] = creer_feuille(tab, i);
+        if (tab_global[i] > 0) {
+        arbre_huffman[nb_noeuds] = creer_feuille(tab_global, i);
         nb_noeuds++; 
       }
     }
@@ -95,10 +106,7 @@ if(compresse == 1){
       creer_noeud(arbre_huffman, nb_noeuds);
       nb_noeuds--; 
     }
-    /*Affichage de l'arbre de Huffman*/
-    printf("-------------------------------------\n");
-    afficher_arbre(arbre_huffman[0]);
-    printf("-------------------------------------\n");
+   
 
   /*création des codes de Huffman pour chaque caractère*/
     creer_code(arbre_huffman[0], 0, 0, alphabet);
@@ -111,50 +119,42 @@ if(compresse == 1){
       }
     }
 
-  /* Écriture de l'en-tête et du contenu compressé*/
-    fichier_compresse = fopen(argv[3], "wb");
+  
+  fichier_compresse = fopen(argv[argc - 1], "wb");
     if (fichier_compresse == NULL) {
-      printf("Erreur lors de l'ouverture du fichier compressé");
-      exit(EXIT_FAILURE);
+        printf("Erreur lors de l'ouverture du fichier compressé pour écriture");
+        exit(EXIT_FAILURE);
     }
 
     ecrire_entete(fichier_compresse, alphabet, nombre_feuilles);
-    contenu_compresse(fichier,fichier_compresse,alphabet);
-   
-    fclose(fichier_compresse);
+  
+  for (fich_idx = optind; fich_idx < argc - 1; fich_idx++) {  
+    fichier = fopen(argv[fich_idx], "rb");
+    fprintf(fichier_compresse, "%s ",argv[fich_idx] );
+    contenu_compresse(fichier, fichier_compresse, alphabet);
     fclose(fichier);
   }
-  
-  if(decompresse == 1){
-    if(optind<argc){
-      chemin_fichier_compresse = argv[optind];
-    if (argc > optind + 1) {
-            dossier_cible = argv[optind + 1];
-        }
-    } 
-    if (strcmp(dossier_cible, ".") != 0) {
-        sprintf(chemin, "%s/fichier_decompresse.txt", dossier_cible);
-    } else {
-       sprintf(chemin, "fich_decomp.txt");
-       
-    }
-    /*Réouverture du fichier compressé pour vérification*/
-    fichier_compresse = fopen(chemin_fichier_compresse, "rb");
-    if (fichier_compresse == NULL) {
-        fprintf(stderr, "Erreur lors de l'ouverture du fichier compressé '%s'.\n", chemin_fichier_compresse);
-        exit(EXIT_FAILURE);
-    }
     
-  
-  lire_entete(fichier_compresse, alphabet);
-  lire_contenu(fichier_compresse, alphabet, chemin);
-  fclose(fichier_compresse);
-
+    fclose(fichier_compresse);
   }
   
-  /*Libération des ressources*/
+  if(decompresse == 1){ 
+
+    fichier_compresse = fopen(chemin_fichier_compresse, "rb");
+    if (fichier_compresse == NULL) {
+        printf("Erreur lors de l'ouverture du fichier compressé pour lecture");
+        exit(EXIT_FAILURE);
+    }
+  
+  
+  lire_entete(fichier_compresse, alphabet);
+  lire_contenu(fichier_compresse, alphabet);
+}
+
+/*Libération des ressources et fermeture des fichiers*/
   liberer_inis(arbre_huffman);
-	exit(EXIT_SUCCESS);
+
+  exit(EXIT_SUCCESS);
 
 
 }
