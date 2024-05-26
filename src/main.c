@@ -16,15 +16,19 @@
  * sortie : (int) état de sortie du programme
  ****************************************/
 int main(int argc, char *argv[]){
+  struct dirent* fichierLu = NULL;
   FILE * fichier = NULL;
   FILE *fichier_compresse=NULL;
+  DIR *dossier = NULL;
   noeud *arbre_huffman[N];
   noeud *alphabet[N];
+
   
   int i, nb_noeuds=0, nombre_feuilles=0;
   int opt, compresse = 0, decompresse = 0, optind=2;
   char *chemin_fichier_compresse = NULL;
-  int fich_idx;
+  char *chemin_dossier = NULL;
+  char nom_fichier[PATH_MAX];
 
   int tab_global[N];
   
@@ -32,7 +36,7 @@ int main(int argc, char *argv[]){
         switch (opt){
         case 'c':
           compresse = 1;
-          
+          chemin_dossier = argv[optind];
           break;
         case 'd':
           decompresse = 1;
@@ -73,19 +77,27 @@ int main(int argc, char *argv[]){
     }
 
 if(compresse == 1){
-   init_tab(tab_global);
-  
-    for (fich_idx = optind; fich_idx < argc - 1; fich_idx++) {
-            fichier = fopen(argv[fich_idx], "rb");
+  init_tab(tab_global);
+  dossier = opendir(chemin_dossier);
+  if(dossier == NULL){
+    perror("Erreur ouverture dossier \n");
+    exit(EXIT_FAILURE);
+  }
+      while((fichierLu = readdir(dossier))!= NULL){
+        if(strcmp(fichierLu->d_name, ".") == 0 || strcmp(fichierLu->d_name, "..") == 0){
+          continue;
+        }
+        sprintf(nom_fichier, "%s/%s",chemin_dossier, fichierLu->d_name);
+            fichier = fopen(nom_fichier, "rb");
             if (fichier == NULL) {
-                fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", argv[fich_idx]);
+                fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", fichierLu->d_name);
                 continue;
             }
  
     
     occurence(fichier, tab_global);
-     fclose(fichier);
-    }
+    fclose(fichier);
+  }
 
 
     arbre(arbre_huffman, tab_global);
@@ -120,29 +132,44 @@ if(compresse == 1){
     }
 
   
-  fichier_compresse = fopen(argv[argc - 1], "wb");
-    if (fichier_compresse == NULL) {
-        printf("Erreur lors de l'ouverture du fichier compressé pour écriture");
-        exit(EXIT_FAILURE);
-    }
 
-    ecrire_entete(fichier_compresse, alphabet, nombre_feuilles);
-  
-  for (fich_idx = optind; fich_idx < argc - 1; fich_idx++) {  
-    fichier = fopen(argv[fich_idx], "rb");
-    fprintf(fichier_compresse, "%s ",argv[fich_idx] );
-    contenu_compresse(fichier, fichier_compresse, alphabet);
-    fclose(fichier);
-  }
+
+
+
+    fichier_compresse = fopen(argv[argc - 1], "wb");
+      if (fichier_compresse == NULL) {
+          perror("Erreur lors de l'ouverture du fichier compressé pour écriture");
+          exit(EXIT_FAILURE);
+      }
+
+      ecrire_entete(fichier_compresse, alphabet, nombre_feuilles);
+      rewinddir(dossier);
+      while((fichierLu = readdir(dossier))!= NULL){
+        if(strcmp(fichierLu->d_name, ".") == 0 || strcmp(fichierLu->d_name, "..") == 0){
+          continue;
+        }
+        sprintf(nom_fichier, "%s/%s",chemin_dossier, fichierLu->d_name);
+            fichier = fopen(nom_fichier, "rb");
+            if (fichier == NULL) {
+                fprintf(stderr, "Erreur lors de l'ouverture du fichier %s\n", fichierLu->d_name);
+                continue;
+            }
+      fichier = fopen(nom_fichier, "rb");
+      fprintf(fichier_compresse, "%s ",nom_fichier );
+      contenu_compresse(fichier, fichier_compresse, alphabet);
+      fclose(fichier);
+    }
     
+
     fclose(fichier_compresse);
+    closedir(dossier);
   }
   
   if(decompresse == 1){ 
 
     fichier_compresse = fopen(chemin_fichier_compresse, "rb");
     if (fichier_compresse == NULL) {
-        printf("Erreur lors de l'ouverture du fichier compressé pour lecture");
+        perror("Erreur lors de l'ouverture du fichier compressé pour lecture");
         exit(EXIT_FAILURE);
     }
   
