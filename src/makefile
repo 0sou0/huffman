@@ -23,5 +23,5 @@ outils.o : outils.c type.h
 	$(CC) $(CDFLAGS) -c $<
 
 clean :
-	rm -f *.o huffman fich_decomp.txt res.txt ./decompression/fich_decomp.txt
+	rm -f *.o huffman
 

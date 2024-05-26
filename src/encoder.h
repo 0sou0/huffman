@@ -45,7 +45,7 @@ void ecrire_code_huffman(FILE *fichier, int codage, int bits, char *buffer, int 
  * entree : pointeur vers fichier fichier_compresse, tableau de pointeurs vers noeud alphabet[], entier nombre_feuilles
  * sortie : aucune (void), écrit l'en-tête dans le fichier
  ****************************************/
-void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuilles);
+void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[] , int nombre_feuilles);
 
 /****************************************
  * fonction : contenu_compresse
