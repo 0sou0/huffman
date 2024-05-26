@@ -19,6 +19,6 @@ void lire_entete(FILE *fichier, noeud *alphabet[]);
  * entree : pointeur vers fichier FILE *fichier_compresse, tableau de pointeurs vers noeud alphabet[]
  * sortie : aucune (void), crée un fichier "decompresse.txt" contenant le texte décompressé
  ****************************************/
-void lire_contenu(FILE *fichier_compresse, noeud *alphabet[],char* chemin);
+void lire_contenu(FILE *fichier_compresse, noeud *alphabet[]);
 
 #endif 
