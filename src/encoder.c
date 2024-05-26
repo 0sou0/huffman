@@ -102,8 +102,8 @@ void ecrire_entete(FILE *fichier_compresse, noeud *alphabet[], int nombre_feuill
     fprintf(fichier_compresse, "%d\n", nombre_feuilles);
 
     for ( i = 0; i < 256; i++) {
-      if (alphabet[i] != NULL && alphabet[i]->occ > 0) {
-	     ecrire_code_huffman(fichier_compresse, alphabet[i]->initial, sizeof(char) * 8, &buffer, &pos);
+        if (alphabet[i] != NULL && alphabet[i]->occ > 0) {
+	  ecrire_code_huffman(fichier_compresse, alphabet[i]->initial, sizeof(char) * 8, &buffer, &pos);
 	  
 	  fprintf(fichier_compresse, " %d ",alphabet[i]->occ);
 	  fprintf(fichier_compresse, "%d ",alphabet[i]->bits);
@@ -144,6 +144,8 @@ void contenu_compresse(FILE *fichier, FILE *fichier_compresse, noeud *alphabet[]
     fprintf(fichier_compresse, "%d", taille);
 
   rewind(fichier);
+
+
 
   while((c = fgetc(fichier)) != EOF){
     if (alphabet[c] != NULL && alphabet[c]->occ > 0) {
